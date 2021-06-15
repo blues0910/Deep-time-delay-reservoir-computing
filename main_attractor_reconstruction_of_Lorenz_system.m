@@ -1,8 +1,8 @@
 clear
-Training_steps=100;
-Predicting_steps=0;
+Training_steps=10000;
+Predicting_steps=1000;
 T=Training_steps+Predicting_steps;
-discarded_steps=0;
+discarded_steps=500;
 training_data=load([pwd '\Generating_training_data\Sample_of_Lorenz_system.mat']);
 Input_streaming=training_data.u(1,1:Training_steps);
 Training_data=training_data.y(:,1:T);
