@@ -20,7 +20,7 @@ var=0.1;
 Input_Mask{1}=-var+(var-(-var)).*rand(size(Input_streaming,1),fix(delayOfLayer(1)/h));
 Input_Mask{2}=ones(1,fix(delayOfLayer(2)/h));
 
-epsilon=0;
+epsilon=0.000001;
 noise=0+sqrt(epsilon).*randn(fix(sum(delayOfLayer)/h),T);
 %------------------------------------------------------------------------------------------------------------
 X=zeros(fix(sum(delayOfLayer)/h),T);
