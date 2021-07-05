@@ -42,6 +42,14 @@ end
 test=discarded_steps+1;
 lamda=0.00001;
 W_out=Batch_training(X(:,test:Training_steps),Training_data(:,test:Training_steps),lamda);
+
+for it=Training_steps+1:T
+    X0=X(:,it-1);
+    Y0=Y(:,it-1);
+    Input=W_out'*X(:,it-1);
+    [X(:,it),Y(:,it)]=update_reservior_states(X0,Y0,Input,noise(:,it),h,NumberOfLayer,delayOfLayer,deltaOfLayer,betaOfLayer,kappaOfLayer,bOfLayer,Input_Mask);
+end
+
 Output_streaming=W_out'*X(:,1:end);
 
 result=CalcPerf(Training_data,y_trained);
