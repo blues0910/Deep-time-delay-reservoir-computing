@@ -47,7 +47,8 @@ for it=Training_steps+1:T
     X0=X(:,it-1);
     Y0=Y(:,it-1);
     Input=W_out'*X(:,it-1);
-    [X(:,it),Y(:,it)]=update_reservior_states(X0,Y0,Input,noise(:,it),h,NumberOfLayer,delayOfLayer,deltaOfLayer,betaOfLayer,kappaOfLayer,bOfLayer,Input_Mask);
+    J=Prepocessing_of_input(Input,Input_Mask);
+    [X(:,it),Y(:,it)]=update_reservior_states(X0,Y0,J{1},noise(:,it),h,NumberOfLayer,delayOfLayer,deltaOfLayer,betaOfLayer,kappaOfLayer,bOfLayer);
 end
 
 Output_streaming=W_out'*X(:,1:end);
