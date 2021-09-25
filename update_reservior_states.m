@@ -10,13 +10,16 @@ for i=1:NumberOfLayer
     if i==1
         I1=times(Input_Mask{i},Input);
         [X(1:N),Y(1:N)] = layer(delayOfLayer(i),X0(1:N),Y0(N),h,I1,z(1:N),deltaOfLayer(i),betaOfLayer(i),kappaOfLayer(i),bOfLayer(i));
-        I2=pchip(linspace(1,delayOfLayer(i),N),X(1:N),linspace(1,delayOfLayer(i),fix(delayOfLayer(i+1)/h)));
+        if NumberOfLayer>1
+            I2=pchip(linspace(1,delayOfLayer(i),N),X(1:N),linspace(1,delayOfLayer(i),fix(delayOfLayer(i+1)/h)));
+        end
     else
-        NN=fix(delayOfLayer(i-1)/h);
+        NN=fix(sum(delayOfLayer(1:i-1))/h);
         I2=times(Input_Mask{i},I2);
         [X(NN+1:N),Y(NN+1:N)] = layer(delayOfLayer(i),X0(NN+1:N),Y0(fix(sum(delayOfLayer(1:i))/h)),h,I2,z(NN+1:N),deltaOfLayer(i),betaOfLayer(i),kappaOfLayer(i),bOfLayer(i));
         if i~=NumberOfLayer
-            I2=pchip(X(NN+1:N),linspace(1,delayOfLayer(i),fix(delayOfLayer(i)/h)),linspace(1,delayOfLayer(i),fix(delayOfLayer(i+1)/h)));
+            I2=pchip(linspace(1,delayOfLayer(i),fix(delayOfLayer(i)/h)),X(NN+1:N),linspace(1,delayOfLayer(i),fix(delayOfLayer(i+1)/h)));
+%             I2=pchip(X(NN+1:N),linspace(1,delayOfLayer(i),fix(delayOfLayer(i)/h)),linspace(1,delayOfLayer(i),fix(delayOfLayer(i+1)/h)));
         end
     end
 end
@@ -28,13 +31,13 @@ x=zeros(N,1);
 y=zeros(N,1);
 for j=1:N 
     if j==1
-        [x(j),y(j)]=Euler(@Fx,@Fy,x0(N),y0,h,x0(1),J(j),z(j),delta,beta,kappa,b);
+        [x(j),y(j)]=marunge4(@Fx,@Fy,x0(N),y0,h,x0(1),J(j),z(j),delta,beta,kappa,b);
     else
-        [x(j),y(j)]=Euler(@Fx,@Fy,x(j-1),y(j-1),h,x0(j),J(j),z(j),delta,beta,kappa,b);
+        [x(j),y(j)]=marunge4(@Fx,@Fy,x(j-1),y(j-1),h,x0(j),J(j),z(j),delta,beta,kappa,b);
     end
 end
 end
-function [x,y]=Euler(varargin)
+function [x,y]=marunge4(varargin)
 FuncHandle1=varargin{1};
 FuncHandle2=varargin{2};
 x0=varargin{3};
