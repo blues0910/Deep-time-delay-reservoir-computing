@@ -1,6 +1,6 @@
 function [X,Y]=update_reservior_states(X0,Y0,Input,z,h,NumberOfLayer,delayOfLayer,deltaOfLayer,betaOfLayer,kappaOfLayer,bOfLayer,Input_Mask)
-% 此处显示有关此函数的摘要
-% 此处显示详细说明
+% 姝ゅ鏄剧ず鏈夊叧姝ゅ嚱鏁扮殑鎽樿
+% 姝ゅ鏄剧ず璇︾粏璇存槑
 %---------------------------
 %---------------------------
 X=zeros(fix(sum(delayOfLayer)/h),1);
@@ -19,7 +19,6 @@ for i=1:NumberOfLayer
         [X(NN+1:N),Y(NN+1:N)] = layer(delayOfLayer(i),X0(NN+1:N),Y0(fix(sum(delayOfLayer(1:i))/h)),h,I2,z(NN+1:N),deltaOfLayer(i),betaOfLayer(i),kappaOfLayer(i),bOfLayer(i));
         if i~=NumberOfLayer
             I2=pchip(linspace(1,delayOfLayer(i),fix(delayOfLayer(i)/h)),X(NN+1:N),linspace(1,delayOfLayer(i),fix(delayOfLayer(i+1)/h)));
-%             I2=pchip(X(NN+1:N),linspace(1,delayOfLayer(i),fix(delayOfLayer(i)/h)),linspace(1,delayOfLayer(i),fix(delayOfLayer(i+1)/h)));
         end
     end
 end
