@@ -44,9 +44,6 @@ for it=1:Training_steps
         Y0=Y(:,it-1);
     end
     [xx(:,it),X(:,it),Y(:,it)]=update_reservior_states(X0,Y0,Input_streaming(:,it),noise(:,it),h,NumberOfLayer,delayOfLayer,deltaOfLayer,betaOfLayer,kappaOfLayer,bOfLayer,Input_Mask,Nv);
-    if mod(it,1000)==0
-        disp(it)
-    end
 end
 
 test=discarded_steps+1;
