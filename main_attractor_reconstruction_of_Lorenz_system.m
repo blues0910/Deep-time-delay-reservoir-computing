@@ -7,22 +7,31 @@ training_data=load([pwd '\Generating_training_data\Sample_of_Lorenz_system.mat']
 Input_streaming=training_data.u(:,1:Training_steps);
 Training_data=training_data.y(:,1:T);
 %------------------------------------------------------------------------------------------------------------
-NumberOfLayer=2;
-delayOfLayer=[200 400];
-deltaOfLayer=[0 0.01];
-betaOfLayer=[0.68 0.8];
-kappaOfLayer=[4.0 1];
-bOfLayer=[0.2 0.2];
+NumberOfLayer=5;
+delayOfLayer=[80 40 20 10 10];
+deltaOfLayer=[0 0.01 0.01 0.01 0.01];
+betaOfLayer=[0.68 0.8 0.97 0.83 0.2];
+kappaOfLayer=[0.4 0.1 0.1 0.1 0.1];
+bOfLayer=[0.2 0.2 1.5 1.28 1.9];
 h=0.2;
+
+Nv=fix(delayOfLayer/1);
+
+x = Equilibrium(h,NumberOfLayer,delayOfLayer,deltaOfLayer,betaOfLayer,kappaOfLayer,bOfLayer,Nv);
 %------------------------------------------------------------------------------------------------------------
 Input_Mask=cell(1,NumberOfLayer);
-var=0.1;
-Input_Mask{1}=-var+(var-(-var)).*rand(size(Input_streaming,1),fix(delayOfLayer(1)/h));
-Input_Mask{2}=ones(1,fix(delayOfLayer(2)/h));
+for k=1:NumberOfLayer
+    if k==1
+        Input_Mask{k}=normalized_Mask(1,size(Input_streaming,1),fix(delayOfLayer(k)/h));
+    else
+        Input_Mask{k}=ones(1,fix(delayOfLayer(k)/h));
+    end
+end
 
-epsilon=0.000001;
+epsilon=0;
 noise=0+sqrt(epsilon).*randn(fix(sum(delayOfLayer)/h),T);
 %------------------------------------------------------------------------------------------------------------
+xx=zeros(sum(Nv),T);
 X=zeros(fix(sum(delayOfLayer)/h),T);
 Y=zeros(fix(sum(delayOfLayer)/h),T);
 
@@ -34,7 +43,7 @@ for it=1:Training_steps
         X0=X(:,it-1);
         Y0=Y(:,it-1);
     end
-    [X(:,it),Y(:,it)]=update_reservior_states(X0,Y0,Input_streaming(:,it),noise(:,it),h,NumberOfLayer,delayOfLayer,deltaOfLayer,betaOfLayer,kappaOfLayer,bOfLayer,Input_Mask);
+    [xx(:,it),X(:,it),Y(:,it)]=update_reservior_states(X0,Y0,Input_streaming(:,it),noise(:,it),h,NumberOfLayer,delayOfLayer,deltaOfLayer,betaOfLayer,kappaOfLayer,bOfLayer,Input_Mask,Nv);
     if mod(it,1000)==0
         disp(it)
     end
@@ -42,17 +51,17 @@ end
 
 test=discarded_steps+1;
 lamda=0.0000001;
-W_out=Batch_training(X(:,test:Training_steps),Training_data(:,test:Training_steps),lamda);
+W_out=Batch_training(xx(:,test:Training_steps),Training_data(:,test:Training_steps),lamda);
 % W_out=OnLine_training(X(:,test:Training_steps),Training_data(:,test:Training_steps),lamda);
 
 for it=Training_steps+1:T
     X0=X(:,it-1);
     Y0=Y(:,it-1);
-    Input=W_out'*X(:,it-1);
-    [X(:,it),Y(:,it)]=update_reservior_states(X0,Y0,Input,noise(:,it),h,NumberOfLayer,delayOfLayer,deltaOfLayer,betaOfLayer,kappaOfLayer,bOfLayer,Input_Mask);
+    Input=W_out'*xx(:,it-1);
+    [xx(:,it),X(:,it),Y(:,it)]=update_reservior_states(X0,Y0,Input,noise(:,it),h,NumberOfLayer,delayOfLayer,deltaOfLayer,betaOfLayer,kappaOfLayer,bOfLayer,Input_Mask,Nv);
 end
 
-y_trained=W_out'*X(:,1:end);
+y_trained=W_out'*xx(:,1:end);
 
 result=CalcPerf(Training_data,y_trained);
 nrmse=result.NRMSE;
