@@ -35,9 +35,14 @@ x=zeros(N,1);
 y=zeros(N,1);
 for j=1:N 
     if j==1
-        [x(j),y(j)]=marunge4(@Fx,@Fy,x0(N),y0,h,x0(1),J(j),z(j),delta,beta,kappa,b);
-    else
-        [x(j),y(j)]=marunge4(@Fx,@Fy,x(j-1),y(j-1),h,x0(j),J(j),z(j),delta,beta,kappa,b);
+        xh=pchip([1 2],x0(j:j+1),1:h:1+3*h);
+        [x(j),y(j)]=marunge4(@Fx,@Fy,x0(N),y0,h,xh,J(j),z(j),delta,beta,kappa,b);
+    elseif j>1&&j<N
+        xh=pchip([1 2],x0(j:j+1),1:h:1+3*h);
+        [x(j),y(j)]=marunge4(@Fx,@Fy,x(j-1),y(j-1),h,xh,J(j),z(j),delta,beta,kappa,b);
+    elseif j==N
+        xh=pchip([1 2],[x0(j) x(1)],1:h:1+3*h);
+        [x(j),y(j)]=marunge4(@Fx,@Fy,x(j-1),y(j-1),h,xh,J(j),z(j),delta,beta,kappa,b);
     end
 end
 end
@@ -55,22 +60,22 @@ beta=varargin{10};
 kappa=varargin{11};
 b=varargin{12};
 
-% k1=FuncHandle1(x0,y0,xh,J,z,delta,beta,kappa,b);
-% l1=FuncHandle2(x0);
-% 
-% k2=FuncHandle1(x0+k1/2,y0+l1/2,xh,J,z,delta,beta,kappa,b);
-% l2=FuncHandle2(x0+k1/2);
-% 
-% k3=FuncHandle1(x0+k2/2,y0+l2/2,xh,J,z,delta,beta,kappa,b);
-% l3=FuncHandle2(x0+k2/2);
-% 
-% k4=FuncHandle1(x0+k3,y0+l3,xh,J,z,delta,beta,kappa,b);
-% l4=FuncHandle2(x0+k3);
-% 
-% x=x0+h*(k1+2*k2+2*k3+k4)/6;
-% y=y0+h*(l1+2*l2+2*l3+l4)/6;
-x=x0+h*FuncHandle1(x0,y0,xh,J,z,delta,beta,kappa,b);
-y=y0+h*FuncHandle2(x0);
+k1=FuncHandle1(x0,y0,xh(1),J,z,delta,beta,kappa,b);
+l1=FuncHandle2(x0);
+
+k2=FuncHandle1(x0+k1/2,y0+l1/2,xh(2),J,z,delta,beta,kappa,b);
+l2=FuncHandle2(x0+k1/2);
+
+k3=FuncHandle1(x0+k2/2,y0+l2/2,xh(3),J,z,delta,beta,kappa,b);
+l3=FuncHandle2(x0+k2/2);
+
+k4=FuncHandle1(x0+k3,y0+l3,xh(4),J,z,delta,beta,kappa,b);
+l4=FuncHandle2(x0+k3);
+
+x=x0+h*(k1+2*k2+2*k3+k4)/6;
+y=y0+h*(l1+2*l2+2*l3+l4)/6;
+% x=x0+h*FuncHandle1(x0,y0,xh,J,z,delta,beta,kappa,b);
+% y=y0+h*FuncHandle2(x0);
 end
 function v = Fx(varargin)
 x=varargin{1};
