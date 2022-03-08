@@ -1,8 +1,23 @@
 function [xx,X,Y]=update_reservior_states(X0,Y0,Input,z,h,NumberOfLayer,delayOfLayer,deltaOfLayer,betaOfLayer,kappaOfLayer,bOfLayer,Input_Mask,Nv)
-% 此处显示有关此函数的摘要
-% 此处显示详细说明
+% A summary about this function is shown here
 %---------------------------
+%Model of L Ikeda time-delay systems
+%dx_l(t)=-x_l(t)-delta_l*sin^2[x_l(t-tau_l)+kappa_l*x_(l-1)(t)+b_l];
+%dy_l(t)=x_l(t)
+%l=1,2,....L
+%
+%Model of deep time-delay reservoir based on L Ikeda time-delay systems driven by time-dependent signals in the presence of state noise
+%dx_l(t)=-x_l(t)-delta_l*sin^2[x_l(t-tau_l)+kappa_l*J_l(t)+b_l+z_l(t)];
+%dy_l(t)=x_l(t)
+%l=1,2,....L
+% 
+% kappa_l: input gain,
+% z_l(t): additive Gaussian state noise,
+% delta_l: feedback gain,
+% tau_l: time-delay
+% J_l(t): time-multiplexed input stream J_l=M_l*u_l, M_l is a mask vector or matrix
 %---------------------------
+
 xx=zeros(sum(Nv),1);
 % yy=zeros(NumberOfLayer*Nv,1);
 X=zeros(fix(sum(delayOfLayer)/h),1);
@@ -23,7 +38,6 @@ for i=1:NumberOfLayer
         xx(sum(Nv(1:i-1))+1:sum(Nv(1:i)))=pchip(linspace(NN+1,N,N-NN),X(NN+1:N),linspace(NN+1,N,Nv(i)));
         if i~=NumberOfLayer
             I2=pchip(linspace(1,delayOfLayer(i),fix(delayOfLayer(i)/h)),X(NN+1:N),linspace(1,delayOfLayer(i),fix(delayOfLayer(i+1)/h)));
-%             I2=pchip(X(NN+1:N),linspace(1,delayOfLayer(i),fix(delayOfLayer(i)/h)),linspace(1,delayOfLayer(i),fix(delayOfLayer(i+1)/h)));
         end
     end
 end
@@ -46,6 +60,7 @@ for j=1:N
     end
 end
 end
+
 function [x,y]=marunge4(varargin)
 FuncHandle1=varargin{1};
 FuncHandle2=varargin{2};
@@ -74,9 +89,8 @@ l4=FuncHandle2(x0+k3);
 
 x=x0+h*(k1+2*k2+2*k3+k4)/6;
 y=y0+h*(l1+2*l2+2*l3+l4)/6;
-% x=x0+h*FuncHandle1(x0,y0,xh,J,z,delta,beta,kappa,b);
-% y=y0+h*FuncHandle2(x0);
 end
+
 function v = Fx(varargin)
 x=varargin{1};
 y=varargin{2};
@@ -90,6 +104,7 @@ b=varargin{9};
 
 v=-x-y*delta+beta*(sin(xh+kappa*J+b+z))^2;
 end
+
 function v = Fy(varargin)
 y=varargin{1};
 v=y;
